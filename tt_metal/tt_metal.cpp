@@ -945,7 +945,7 @@ void WriteRuntimeArgsToDevice(IDevice* device, Program& program, bool force_slow
 
 void CompileProgram(IDevice* device, Program& program, bool force_slow_dispatch) {
     ZoneScoped;
-    printf("AAADDDAAA\n");
+    printf("Run compile program\n");
     program.compile(device, force_slow_dispatch);
 }
 
