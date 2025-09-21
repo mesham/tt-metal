@@ -701,6 +701,7 @@ void LaunchProgram(
 }
 
 void LaunchProgram(IDevice* device, Program& program, bool wait_until_cores_done, bool force_slow_dispatch) {
+    printf("TEST\n");
     {  // Profiler scope start
         ZoneScoped;
         /// This function is shared between FD and SD.
@@ -741,6 +742,8 @@ void LaunchProgram(IDevice* device, Program& program, bool wait_until_cores_done
                     &program.impl().kernels_on_core(logical_core, programmable_core_type_index)->launch_msg;
                 go_msg_t* go_msg = &program.impl().kernels_on_core(logical_core, programmable_core_type_index)->go_msg;
                 msg->kernel_config.host_assigned_id = program.get_runtime_id();
+
+                printf("watcher_kernel_ids: 0x%x 0x%x 0x%x\n", msg->kernel_config.watcher_kernel_ids[0], msg->kernel_config.watcher_kernel_ids[1], msg->kernel_config.watcher_kernel_ids[2]);
 
                 auto physical_core = device->virtual_core_from_logical_core(logical_core, core_type);
                 not_done_cores.insert(physical_core);
@@ -831,6 +834,11 @@ bool ConfigureDeviceWithProgram(IDevice* device, Program& program, bool force_sl
                             circular_buffer_config_vec[base_index + 1] = size_in_bytes;  // convert to addr in 16B words
                             circular_buffer_config_vec[base_index + 2] = num_pages;
                             circular_buffer_config_vec[base_index + 3] = page_size;
+                            printf("=== CB on core ===\n");
+                            printf("CB %d 0x%x: 0x%d\n", buffer_index, base_index, addr_in_bytes);
+                            printf("CB %d 0x%x: 0x%d\n", buffer_index, base_index+1, size_in_bytes);
+                            printf("CB %d 0x%x: 0x%d\n", buffer_index, base_index+2, num_pages);
+                            printf("CB %d 0x%x: 0x%d\n", buffer_index, base_index+3, page_size);
                         }
                         for (uint32_t buffer_index : circular_buffer->remote_buffer_indices()) {
                             uint32_t base_index =
@@ -839,10 +847,14 @@ bool ConfigureDeviceWithProgram(IDevice* device, Program& program, bool force_sl
                             uint32_t config_address = circular_buffer->config_address();
                             circular_buffer_config_vec[base_index] = config_address;
                             circular_buffer_config_vec[base_index + 1] = circular_buffer->page_size(buffer_index);
+                            printf("=== Remote CB ===\n");
+                            printf("CB %d 0x%x: 0x%d\n", buffer_index, base_index, config_address);
+                            printf("CB %d 0x%x: 0x%d\n", buffer_index, base_index+1, circular_buffer->page_size(buffer_index));
                         }
                     }  // PROF_END("CBS")
                     uint64_t kernel_config_base = hal.get_dev_addr(index, HalL1MemAddrType::KERNEL_CONFIG);
                     uint64_t addr = kernel_config_base + program.impl().get_program_config(index).cb_offset;
+                    printf("Write CB config to addr 0x%lx size=%d\n", addr, program.impl().get_program_config(index).cb_size);
                     llrt::write_hex_vec_to_core(device_id, physical_core, circular_buffer_config_vec, addr);
                 }
             }
@@ -881,10 +893,16 @@ void WriteRuntimeArgsToDevice(IDevice* device, Program& program, bool force_slow
                                 const auto& kernel = detail::GetKernel(program, optional_id.value());
                                 const auto& rt_args = kernel->runtime_args(logical_core);
 
+                                printf("==== %zu runtime arguments ==== \n", rt_args.size());
+                                for (int car =0;car<rt_args.size(); car++) {
+                                    printf("Arg %d: 0x%x\n", car, rt_args[car]);
+                                }
+
                                 if (rt_args.size() > 0) {
                                     auto rt_args_addr =
                                         kernel_config_base +
                                         kg->launch_msg.kernel_config.rta_offset[dispatch_class].rta_offset;
+                                    printf("Write RTA to 0x%x\n", rt_args_addr);
                                     log_trace(
                                         tt::LogMetal,
                                         "{} - Writing {} unique rtargs to core {} (physical: {}) addr 0x{:x} => args: "
@@ -927,6 +945,7 @@ void WriteRuntimeArgsToDevice(IDevice* device, Program& program, bool force_slow
 
 void CompileProgram(IDevice* device, Program& program, bool force_slow_dispatch) {
     ZoneScoped;
+    printf("AAADDDAAA\n");
     program.compile(device, force_slow_dispatch);
 }
 

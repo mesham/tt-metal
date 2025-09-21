@@ -525,6 +525,8 @@ void DataMovementKernel::read_binaries(IDevice* device) {
     log_debug(LogLoader, "RISC={}, name={}, size={} (bytes)", riscv_id, this->name(), binary_size);
     this->set_binaries(
         BuildEnvManager::get_instance().get_device_build_env(device->build_id()).build_key, std::move(binaries));
+
+    printf("Kernel name: %s\n", this->name().c_str());
 }
 
 std::vector<std::string> DataMovementKernel::file_paths(IDevice& device) const {
@@ -678,6 +680,8 @@ bool DataMovementKernel::configure(
         *this->binaries(BuildEnvManager::get_instance().get_device_build_env(device->build_id()).build_key)[0];
     int riscv_id = static_cast<std::underlying_type<DataMovementProcessor>::type>(this->config_.processor);
     llrt::write_binary_to_address(binary_mem, device_id, worker_core, base_address + offsets[riscv_id]);
+
+    printf("Launch\n");
 
     return true;
 }

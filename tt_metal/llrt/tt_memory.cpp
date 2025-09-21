@@ -24,6 +24,10 @@ memory::memory() {
 memory::memory(std::string_view path, Loading loading) : loading_(loading) {
     ElfFile elf;
 
+    printf("Read binary %s\n", std::string(path).c_str());
+
+    file_name=std::string(path);
+
     elf.ReadImage(path);
     if (loading == Loading::CONTIGUOUS_XIP) {
         elf.MakeExecuteInPlace();

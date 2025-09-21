@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <functional>
 #include <string_view>
+#include <string>
 #include <vector>
 
 namespace ll_api {
@@ -17,6 +18,8 @@ public:
     using address_t = std::uint64_t;
     using word_t = std::uint32_t;
     enum class Loading : std::uint8_t { DISCRETE, CONTIGUOUS, CONTIGUOUS_XIP };
+
+    std::string file_name=std::string("none");
 
 private:
     struct span {

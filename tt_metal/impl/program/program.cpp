@@ -906,6 +906,7 @@ void detail::ProgramImpl::allocate_circular_buffers(const IDevice* device) {
                         // `core_range` but also intersecting `cb_allocator.core_range`
                         continue;
                     }
+                    printf("Allocate CB %d, 0x%lx\n", circular_buffer->size(), base_cb_address);
                     cb_allocator.mark_address(computed_addr, circular_buffer->size(), base_cb_address);
                 }
             }
@@ -962,6 +963,7 @@ void detail::ProgramImpl::init_semaphores(
     CoreType core_type = MetalContext::instance().hal().get_core_type(programmable_core_type_index);
     auto semaphores_on_core = this->semaphores_on_core(logical_core, core_type);
     for (auto semaphore : semaphores_on_core) {
+        printf("Write semaphore to core at 0x%lx offset is 0x%x\n", addr + semaphore.get().offset(), semaphore.get().offset());
         llrt::write_hex_vec_to_core(
             device.id(),
             device.virtual_core_from_logical_core(logical_core, core_type),
@@ -1449,6 +1451,8 @@ void detail::ProgramImpl::compile(IDevice* device, bool force_slow_dispatch) {
                         kernel,
                         build_options,
                         build_env.build_key);
+
+                    printf("Compile %s\n", kernel->name().c_str());
 
                     const std::string kernel_path_suffix = kernel->name() + "/" + std::to_string(kernel_hash) + "/";
                     kernel->set_full_name(kernel_path_suffix);

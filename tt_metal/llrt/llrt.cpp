@@ -148,7 +148,34 @@ void write_launch_msg_to_core(chip_id_t chip, const CoreCoord core, launch_msg_t
     tt::tt_metal::MetalContext::instance().get_cluster().write_core(
         (void*)&msg->kernel_config, sizeof(kernel_config_msg_t), tt_cxy_pair(chip, core), launch_addr);
     tt_driver_atomics::sfence();
+
+    printf("---- Launching '%s' 0x%lx ------ \n", core.str().c_str(), base_addr);
+    printf("[0x%lx] watcher_kernel_ids: 0x%x 0x%x 0x%x\n", offsetof(kernel_config_msg_t, watcher_kernel_ids), msg->kernel_config.watcher_kernel_ids[0], msg->kernel_config.watcher_kernel_ids[1], msg->kernel_config.watcher_kernel_ids[2]);
+    printf("[0x%lx] ncrisc_kernel_size16: 0x%x\n", offsetof(kernel_config_msg_t, ncrisc_kernel_size16), msg->kernel_config.ncrisc_kernel_size16);
+    printf("[0x%lx] kernel_config_base: 0x%x 0x%x 0x%x\n", offsetof(kernel_config_msg_t, kernel_config_base), msg->kernel_config.kernel_config_base[0], msg->kernel_config.kernel_config_base[1], msg->kernel_config.kernel_config_base[2]);
+    printf("[0x%lx] sem_offset: 0x%x 0x%x 0x%x\n", offsetof(kernel_config_msg_t, sem_offset), msg->kernel_config.sem_offset[0], msg->kernel_config.sem_offset[1], msg->kernel_config.sem_offset[2]);
+    printf("[0x%lx] local_cb_offset: 0x%x\n", offsetof(kernel_config_msg_t, local_cb_offset), msg->kernel_config.local_cb_offset);
+    printf("[0x%lx] remote_cb_offset: 0x%x\n", offsetof(kernel_config_msg_t, remote_cb_offset), msg->kernel_config.remote_cb_offset);
+    printf("[0x%lx] rta_offset 0: 0x%x 0x%x\n", offsetof(kernel_config_msg_t, rta_offset), msg->kernel_config.rta_offset[0].rta_offset, msg->kernel_config.rta_offset[0].crta_offset);
+    printf("[0x%lx] rta_offset 1: 0x%x 0x%x\n", offsetof(kernel_config_msg_t, rta_offset) + 0x4, msg->kernel_config.rta_offset[1].rta_offset, msg->kernel_config.rta_offset[1].crta_offset);
+    printf("[0x%lx] rta_offset 2: 0x%x 0x%x\n", offsetof(kernel_config_msg_t, rta_offset)+ 0x8, msg->kernel_config.rta_offset[2].rta_offset, msg->kernel_config.rta_offset[2].crta_offset);
+    printf("[0x%lx] mode: 0x%x\n", offsetof(kernel_config_msg_t, mode), msg->kernel_config.mode);
+    printf("[0x%lx] kernel_text_offset: 0x%x 0x%x 0x%x 0x%x 0x%x\n", offsetof(kernel_config_msg_t, kernel_text_offset), msg->kernel_config.kernel_text_offset[0], msg->kernel_config.kernel_text_offset[1],msg->kernel_config.kernel_text_offset[2],msg->kernel_config.kernel_text_offset[3],msg->kernel_config.kernel_text_offset[4]);
+    printf("[0x%lx] local_cb_mask: 0x%x\n", offsetof(kernel_config_msg_t, local_cb_mask), msg->kernel_config.local_cb_mask);
+    printf("[0x%lx] brisc_noc_id: 0x%x\n", offsetof(kernel_config_msg_t, brisc_noc_id), msg->kernel_config.brisc_noc_id);
+    printf("[0x%lx] brisc_noc_mode: 0x%x\n", offsetof(kernel_config_msg_t, brisc_noc_mode), msg->kernel_config.brisc_noc_mode);
+    printf("[0x%lx] min_remote_cb_start_index: 0x%x\n", offsetof(kernel_config_msg_t, min_remote_cb_start_index), msg->kernel_config.min_remote_cb_start_index);
+    printf("[0x%lx] exit_erisc_kernel: 0x%x\n", offsetof(kernel_config_msg_t, exit_erisc_kernel), msg->kernel_config.exit_erisc_kernel);
+    printf("[0x%lx] host_assigned_id: 0x%x\n", offsetof(kernel_config_msg_t, host_assigned_id), msg->kernel_config.host_assigned_id);
+    printf("[0x%lx] sub_device_origin_x: 0x%x\n", offsetof(kernel_config_msg_t, sub_device_origin_x), msg->kernel_config.sub_device_origin_x);
+    printf("[0x%lx] sub_device_origin_y: 0x%x\n", offsetof(kernel_config_msg_t, sub_device_origin_y), msg->kernel_config.sub_device_origin_y);
+    printf("[0x%lx] enables: 0x%x\n", offsetof(kernel_config_msg_t, enables), msg->kernel_config.enables);
+    printf("[0x%lx] preload: 0x%x\n", offsetof(kernel_config_msg_t, preload), msg->kernel_config.preload);
+
+    printf("-> [0x%lx] GO: dispatch_message_offset: 0x%x master_x: 0x%x master_y: 0x%x signal: 0x%x\n", go_addr, go_msg->dispatch_message_offset, go_msg->master_x, go_msg->master_y, go_msg->signal);
+
     if (send_go) {
+        printf("Sent go message\n");
         tt::tt_metal::MetalContext::instance().get_cluster().write_core(
             go_msg, sizeof(go_msg_t), tt_cxy_pair(chip, core), go_addr);
     }
@@ -203,6 +230,7 @@ bool test_load_write_read_risc_binary(
 
 void write_binary_to_address(ll_api::memory const& mem, chip_id_t chip_id, const CoreCoord& core, uint32_t address) {
     log_debug(tt::LogLLRuntime, "vec size = {}, size_in_bytes = {}", mem.size(), mem.size() * sizeof(uint32_t));
+    printf("Write binary %s of length 0x%lx to addr 0x%x\n", mem.file_name.c_str(), mem.size() * sizeof(uint32_t), address);
     mem.process_spans([&](std::vector<uint32_t>::const_iterator mem_ptr, uint64_t /*addr*/, uint32_t len_words) {
         tt::tt_metal::MetalContext::instance().get_cluster().write_core(
             &*mem_ptr, len_words * sizeof(uint32_t), tt_cxy_pair(chip_id, core), address);

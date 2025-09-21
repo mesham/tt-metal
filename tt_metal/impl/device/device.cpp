@@ -348,10 +348,14 @@ void Device::init_command_queue_device() {
     for (uint32_t index = 0; index < hal.get_programmable_core_type_count(); index++) {
         const auto& logical_dispatch_cores = logical_cores[index];
         CoreType core_type = hal.get_core_type(index);
+        printf("Handle for index %d\n", index);
         for (const CoreCoord& logical_dispatch_core : logical_dispatch_cores) {
             launch_msg_t msg = command_queue_program.impl().kernels_on_core(logical_dispatch_core, index)->launch_msg;
             go_msg_t go_msg = command_queue_program.impl().kernels_on_core(logical_dispatch_core, index)->go_msg;
             CoreCoord virtual_core = this->virtual_core_from_logical_core(logical_dispatch_core, core_type);
+
+            //printf("watcher_kernel_ids: 0x%x 0x%x 0x%x\n", msg.kernel_config.watcher_kernel_ids[0], msg.kernel_config.watcher_kernel_ids[1], msg.kernel_config.watcher_kernel_ids[2]);
+            printf("Launch at 357\n");
             tt::llrt::write_launch_msg_to_core(
                 this->id(), virtual_core, &msg, &go_msg, this->get_dev_addr(virtual_core, HalL1MemAddrType::LAUNCH));
         }
@@ -397,6 +401,7 @@ void Device::configure_fabric() {
             msg->kernel_config.host_assigned_id = fabric_program_->get_runtime_id();
 
             auto physical_core = this->virtual_core_from_logical_core(logical_core, core_type);
+            printf("Launch at 403\n");
             tt::llrt::write_launch_msg_to_core(
                 this->id(), physical_core, msg, go_msg, this->get_dev_addr(physical_core, HalL1MemAddrType::LAUNCH));
         }
