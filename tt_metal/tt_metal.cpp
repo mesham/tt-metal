@@ -835,10 +835,10 @@ bool ConfigureDeviceWithProgram(IDevice* device, Program& program, bool force_sl
                             circular_buffer_config_vec[base_index + 2] = num_pages;
                             circular_buffer_config_vec[base_index + 3] = page_size;
                             printf("=== CB on core ===\n");
-                            printf("CB %d 0x%x: 0x%d\n", buffer_index, base_index, addr_in_bytes);
-                            printf("CB %d 0x%x: 0x%d\n", buffer_index, base_index+1, size_in_bytes);
-                            printf("CB %d 0x%x: 0x%d\n", buffer_index, base_index+2, num_pages);
-                            printf("CB %d 0x%x: 0x%d\n", buffer_index, base_index+3, page_size);
+                            printf("CB %d 0x%x: 0x%x\n", buffer_index, base_index, addr_in_bytes);
+                            printf("CB %d 0x%x: 0x%x\n", buffer_index, base_index+1, size_in_bytes);
+                            printf("CB %d 0x%x: 0x%x\n", buffer_index, base_index+2, num_pages);
+                            printf("CB %d 0x%x: 0x%x\n", buffer_index, base_index+3, page_size);
                         }
                         for (uint32_t buffer_index : circular_buffer->remote_buffer_indices()) {
                             uint32_t base_index =
@@ -848,8 +848,8 @@ bool ConfigureDeviceWithProgram(IDevice* device, Program& program, bool force_sl
                             circular_buffer_config_vec[base_index] = config_address;
                             circular_buffer_config_vec[base_index + 1] = circular_buffer->page_size(buffer_index);
                             printf("=== Remote CB ===\n");
-                            printf("CB %d 0x%x: 0x%d\n", buffer_index, base_index, config_address);
-                            printf("CB %d 0x%x: 0x%d\n", buffer_index, base_index+1, circular_buffer->page_size(buffer_index));
+                            printf("CB %d 0x%x: 0x%x\n", buffer_index, base_index, config_address);
+                            printf("CB %d 0x%x: 0x%x\n", buffer_index, base_index+1, circular_buffer->page_size(buffer_index));
                         }
                     }  // PROF_END("CBS")
                     uint64_t kernel_config_base = hal.get_dev_addr(index, HalL1MemAddrType::KERNEL_CONFIG);
